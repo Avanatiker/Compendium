@@ -1,13 +1,10 @@
 package me.constructor
 
 import me.tongfei.progressbar.ProgressBar
-import me.tongfei.progressbar.ProgressBarStyle
 import net.querz.mca.MCAFile
 import net.querz.nbt.*
 import java.io.File
 import java.security.MessageDigest
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 import java.util.zip.GZIPOutputStream
 
 fun compound(block: CompoundTag.() -> Unit): CompoundTag {
