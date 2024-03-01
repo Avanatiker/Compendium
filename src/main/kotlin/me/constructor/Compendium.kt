@@ -1,6 +1,5 @@
 package me.constructor
 
-import me.constructor.mc.constructor.*
 import net.querz.mca.MCAFile
 import net.querz.nbt.CompoundTag
 import net.querz.nbt.ListTag
