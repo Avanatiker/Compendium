@@ -46,7 +46,7 @@ The available options are:
 Here is an example of how to use Compendium:
 
 ```
-java -jar compendium.jar --input 'my-save' --mapping 'my-mapping.json' --output 'my-remapped-save'
+java -jar compendium-1.0.jar --input 'my-save' --mapping 'my-mapping.json' --output 'my-remapped-save'
 ```
 
 This command will remap the map items in the 'my-save' directory using the mappings in the 'my-mapping.json' file, and save the remapped files in the 'my-remapped-save' directory.
