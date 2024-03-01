@@ -31,7 +31,7 @@ Compendium generates a modified save file with the updated map data.
 To use Compendium, execute the application with the appropriate command-line arguments. Here is the basic usage:
 
 ```
-java -jar compendium.jar [OPTIONS]
+java -jar compendium-1.0.jar [OPTIONS]
 ```
 
 The available options are:
