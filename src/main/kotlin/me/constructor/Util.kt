@@ -19,6 +19,11 @@ inline fun listTag(type: Tag.Type, block: ListTag.() -> Unit): ListTag {
     return listTag
 }
 
+fun File.readNBT(modify: CompoundTag.() -> Unit) {
+    val tag = NBTUtil.read(this) as CompoundTag
+    tag.modify()
+}
+
 fun File.useNBT(compressed: Boolean = false, modify: CompoundTag.() -> Unit) {
     val tag = NBTUtil.read(this) as CompoundTag
     tag.modify()

@@ -72,12 +72,11 @@ class Compendium(
                 progressBar.step()
                 val currentMapId = mapDat.mapId()
 
-                mapDat.useNBT {
-                    val data = getCompoundTag("data") ?: return@useNBT
+                mapDat.readNBT {
+                    val data = getCompoundTag("data") ?: return@readNBT
                     val mapHash = data.getByteArray("colors").digestHex()
 
                     dbHandler.registerMapAllocation(mapHash, currentMapId)
-
                     mapMapping[currentMapId] = dbHandler.getMapId(mapHash)
                 }
             }
