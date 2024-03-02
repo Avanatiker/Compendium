@@ -2,7 +2,7 @@
         ┏┓            ┓•     
         ┃ ┏┓┏┳┓┏┓┏┓┏┓┏┫┓┓┏┏┳┓
         ┗┛┗┛┛┗┗┣┛┗ ┛┗┗┻┗┗┻┛┗┗
-          v1.1 ┛ by Constructor
+          v1.2 ┛ by Constructor
 ```
 
 Compendium is a command-line application,
@@ -31,7 +31,7 @@ Compendium generates a modified save file with the updated map data.
 To use Compendium, execute the application with the appropriate command-line arguments. Here is the basic usage:
 
 ```
-java -jar compendium-1.1.jar [OPTIONS]
+java -jar compendium-1.2.jar [OPTIONS]
 ```
 
 The available options are:
@@ -47,7 +47,7 @@ The available options are:
 Here is an example of how to use Compendium:
 
 ```
-java -jar compendium-1.1.jar --input 'my-save' --mapping 'my-mapping.json' --output 'my-remapped-save'
+java -jar compendium-1.2.jar --input 'my-save' --mapping 'my-mapping.json' --output 'my-remapped-save'
 ```
 
 This command will remap the map items in the 'my-save' directory using the mappings in the 'my-mapping.json' file, and save the remapped files in the 'my-remapped-save' directory.

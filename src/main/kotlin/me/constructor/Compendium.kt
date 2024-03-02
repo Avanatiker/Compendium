@@ -18,7 +18,7 @@ class Compendium(
         ┏┓            ┓•     
         ┃ ┏┓┏┳┓┏┓┏┓┏┓┏┫┓┓┏┏┳┓
         ┗┛┗┛┛┗┗┣┛┗ ┛┗┗┻┗┗┻┛┗┗
-          v1.1 ┛ by Constructor
+          v1.2 ┛ by Constructor
     """.trimIndent()
     private val dbHandler = DatabaseHandler(mappingFile)
     private val inputFile = File(inputDir)
