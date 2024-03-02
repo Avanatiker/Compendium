@@ -39,6 +39,8 @@ fun File.useGzipNBT(modify: CompoundTag.() -> Unit) {
     }
 }
 
+fun File.toMCA() = MCAFile(this)
+
 fun MCAFile.use(use: MCAFile.() -> Unit) {
     load()
     use()

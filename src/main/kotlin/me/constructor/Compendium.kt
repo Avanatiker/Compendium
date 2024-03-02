@@ -111,7 +111,7 @@ class Compendium(
                 if (mcaFile.parentFile.name in listOf("poi")) return@forEach
                 if (mcaFile.length() == 0L) return@forEach
 
-                MCAFile(mcaFile).use {
+                mcaFile.toMCA().use {
                     when (mcaFile.parentFile.name) {
                         "region" -> {
                             filterNotNull().forEach { chunk ->
@@ -210,22 +210,23 @@ class Compendium(
                 tag.getIntTag("map")?.let {
                     val mapId = it.asInt()
 
-                    mapMapping[mapId]?.let { newMapId ->
-                        tag.putInt("map", newMapId)
+                    val newID = mapMapping[mapId]
+
+                    if (newID == null) {
+                        if (dumpIDs) {
+                            notFoundFile.appendText(mapId.toString() + "\n")
+                        }
+                        println("Map ID: $mapId not found in mapping database. Flipping to negative value.")
+                        tag.putInt("map", -mapId)
+                    } else {
+                        tag.putInt("map", newID)
 //                        println("Remapped map item $mapId -> $newMapId")
 
                         if (dumpIDs) {
-                            foundFile.appendText("$mapId -> $newMapId\n")
+                            foundFile.appendText("$mapId -> $newID\n")
                         }
                         remapped++
-                        return
                     }
-
-                    if (dumpIDs) {
-                        notFoundFile.appendText(mapId.toString() + "\n")
-                    }
-
-                    println("Map ID: $mapId not found in mapping database.")
                 }
             }
         }
