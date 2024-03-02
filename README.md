@@ -39,6 +39,7 @@ The available options are:
 - `--input <inputDir>`: Defines the input directory containing the files to be remapped. The default is 'save'.
 - `--mapping <mappingFile>`: Defines the JSON mapping file used for remapping. The default is 'hash-mapping.json'.
 - `--output <outputDir>`: Defines the output directory where the remapped files will be saved. The default is 'remapped'.
+- `--dumpIDs`: Dumps the found and not found map IDs into separate text files in the output directory. (default: false)
 - `--help`: Displays the help message.
 
 ## Example
