@@ -11,7 +11,8 @@ import kotlin.system.exitProcess
 class Compendium(
     inputDir: String = "save",
     mappingFile: String = "hash-mapping.json",
-    private val outputDir: String = "remapped"
+    private val outputDir: String = "remapped",
+    private val dumpIDs: Boolean = false
 ) {
     private val splash = """
         ┏┓            ┓•     
@@ -25,6 +26,8 @@ class Compendium(
     private val mapFile = File(inputDir, "data")
     private val levelDat = File(outputDir, "level.dat")
     private val playerData = File(outputDir, "playerdata")
+    private val notFoundFile = File(outputDir, "ids-not-found.txt")
+    private val foundFile = File(outputDir, "ids-found.txt")
     private val mapDatFiles = mapFile.listFiles { it ->
         it.name.startsWith("map_") && it.extension == "dat"
     } ?: throw IllegalStateException("No map files found in given directory.")
@@ -206,11 +209,23 @@ class Compendium(
             getCompoundTag("tag")?.let { tag ->
                 tag.getIntTag("map")?.let {
                     val mapId = it.asInt()
-                    val newMapId = mapMapping[mapId] ?: return
-                    tag.putInt("map", newMapId)
 
-//                    println("Remapped map item $mapId -> $newMapId")
-                    remapped++
+                    mapMapping[mapId]?.let { newMapId ->
+                        tag.putInt("map", newMapId)
+//                        println("Remapped map item $mapId -> $newMapId")
+
+                        if (dumpIDs) {
+                            foundFile.appendText("$mapId -> $newMapId\n")
+                        }
+                        remapped++
+                        return
+                    }
+
+                    if (dumpIDs) {
+                        notFoundFile.appendText(mapId.toString() + "\n")
+                    }
+
+                    println("Map ID: $mapId not found in mapping database.")
                 }
             }
         }
