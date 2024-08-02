@@ -1,9 +1,7 @@
 package me.constructor
 
-import net.querz.mca.MCAFile
 import net.querz.nbt.CompoundTag
 import net.querz.nbt.ListTag
-import net.querz.nbt.Tag
 import net.querz.nbt.io.snbt.SNBTWriter
 import java.io.File
 import kotlin.system.exitProcess
@@ -18,7 +16,7 @@ class Compendium(
         ┏┓            ┓•     
         ┃ ┏┓┏┳┓┏┓┏┓┏┓┏┫┓┓┏┏┳┓
         ┗┛┗┛┛┗┗┣┛┗ ┛┗┗┻┗┗┻┛┗┗
-          v1.2 ┛ by Constructor
+          v1.3 ┛ by Constructor
     """.trimIndent()
     private val dbHandler = DatabaseHandler(mappingFile)
     private val inputFile = File(inputDir)
@@ -28,8 +26,8 @@ class Compendium(
     private val playerData = File(outputDir, "playerdata")
     private val notFoundFile = File(outputDir, "ids-not-found.txt")
     private val foundFile = File(outputDir, "ids-found.txt")
-    private val mapDatFiles = mapFile.listFiles { it ->
-        it.name.startsWith("map_") && it.extension == "dat"
+    private val mapDatFiles = mapFile.listFiles { file ->
+        file.name.startsWith("map_") && file.extension == "dat"
     } ?: throw IllegalStateException("No map files found in given directory.")
     private val mcaFiles: List<File> by lazy {
         outputFile.walk().filter { it.isFile && it.extension == "mca" }.toList()
@@ -131,22 +129,16 @@ class Compendium(
     }
 
     private fun CompoundTag.remapChunk() {
-        getListTag("block_entities")?.let { blockEntities ->
-            blockEntities.filterIsInstance<CompoundTag>().forEach { entity ->
-                entity.remapEntity()
-            }
+        getCompoundTag("Level")?.let { level ->
+            level.getListTag("TileEntities")?.remapEntities()
+            level.getListTag("Entities")?.remapEntities()
         }
-    }
-
-    private fun ListTag.remapEntities() {
-        filterIsInstance<CompoundTag>().forEach { entity ->
-            entity.remapEntity()
-        }
+        getListTag("block_entities")?.remapEntities()
     }
 
     private fun remapPlayerData() {
-        val playerFiles = playerData.listFiles { it ->
-            it.extension == "dat"
+        val playerFiles = playerData.listFiles { file ->
+            file.extension == "dat"
         } ?: return
         "Remapping player data".toProgress(playerFiles.size.toLong(), " players").use { progressBar ->
             playerFiles.forEach { playerDat ->
@@ -176,29 +168,35 @@ class Compendium(
         }
     }
 
+    private fun ListTag.remapEntities() {
+        filterIsInstance<CompoundTag>().forEach { entity ->
+            entity.remapEntity()
+        }
+    }
+
     private fun CompoundTag.remapEntity() {
         // Item lying on the ground
         getCompoundTag("Item")?.remapItem()
 
         // Lockable Container
-        getListTag("Items")?.let { items ->
-            items.filterIsInstance<CompoundTag>().forEach { item ->
-                item.remapItem()
-            }
-        }
+        getListTag("Items")?.remapItems()
 
         // Items in hands
-        getCompoundTag("HandItems")?.let { handItems ->
-            handItems.filterIsInstance<CompoundTag>().forEach { item ->
-                item.remapItem()
-            }
-        }
+        getCompoundTag("HandItems")?.remapItems()
 
         // Armor items
-        getCompoundTag("ArmorItems")?.let { armorItems ->
-            armorItems.filterIsInstance<CompoundTag>().forEach { item ->
-                item.remapItem()
-            }
+        getCompoundTag("ArmorItems")?.remapItems()
+    }
+
+    private fun ListTag.remapItems() {
+        filterIsInstance<CompoundTag>().forEach { item ->
+            item.remapItem()
+        }
+    }
+
+    private fun CompoundTag.remapItems() {
+        filterIsInstance<CompoundTag>().forEach { item ->
+            item.remapItem()
         }
     }
 
@@ -206,31 +204,54 @@ class Compendium(
         getStringTag("id")?.let { id ->
             if (id.value != "minecraft:filled_map") return
 
+            getShortTag("Damage")?.let {
+                remapOld(it.asShort())
+            }
             getCompoundTag("tag")?.let { tag ->
                 tag.getIntTag("map")?.let {
-                    val mapId = it.asInt()
-
-                    val newID = mapMapping[mapId]
-
-                    if (newID == null) {
-                        if (dumpIDs) {
-                            notFoundFile.appendText(mapId.toString() + "\n")
-                        }
-                        println("Map ID: $mapId not found in mapping database. Flipping to negative value.")
-                        tag.putInt("map", -mapId)
-                    } else {
-                        tag.putInt("map", newID)
-//                        println("Remapped map item $mapId -> $newMapId")
-
-                        if (dumpIDs) {
-                            foundFile.appendText("$mapId -> $newID\n")
-                        }
-                        remapped++
-                    }
+                    tag.remapNew(it.asInt())
                 }
             }
         }
     }
 
-    private fun Tag.toStyledString() = writer.toString(this)
+    private fun CompoundTag.remapOld(mapId: Short): Any {
+        val newID = mapMapping[mapId.toInt()]?.toShort()
+
+        return if (newID == null) {
+            if (dumpIDs) {
+                notFoundFile.appendText(mapId.toString() + "\n")
+            }
+            println("Map ID: $mapId not found in mapping database. Flipping to negative value.")
+            putShort("Damage", (-mapId).toShort())
+        } else {
+            putShort("Damage", newID)
+            //                        println("Remapped map item $mapId -> $newMapId")
+
+            if (dumpIDs) {
+                foundFile.appendText("$mapId -> $newID\n")
+            }
+            remapped++
+        }
+    }
+
+    private fun CompoundTag.remapNew(mapId: Int): Any {
+        val newID = mapMapping[mapId]
+
+        return if (newID == null) {
+            if (dumpIDs) {
+                notFoundFile.appendText(mapId.toString() + "\n")
+            }
+            println("Map ID: $mapId not found in mapping database. Flipping to negative value.")
+            putInt("map", -mapId)
+        } else {
+            putInt("map", newID)
+    //                        println("Remapped map item $mapId -> $newMapId")
+
+            if (dumpIDs) {
+                foundFile.appendText("$mapId -> $newID\n")
+            }
+            remapped++
+        }
+    }
 }
